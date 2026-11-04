@@ -13,28 +13,26 @@ import com.hr_management.Entity.UserAuth;
 import com.hr_management.Repository.UserAuthRepository;
 import com.hr_management.Security.JwtTokenUtil;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserAuthRepository repo;
     private final PasswordEncoder encoder;
     private final JwtTokenUtil jwt;
 
-    public AuthService(UserAuthRepository repo, PasswordEncoder encoder, JwtTokenUtil jwt) {
-        this.repo = repo;
-        this.encoder = encoder;
-        this.jwt = jwt;
-    }
-
     public void register(RegisterRequest req) {
         if (repo.existsByUserEmail(req.userEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
-        UserAuth user = new UserAuth();
-        user.setUserName(req.userName());
-        user.setUserEmail(req.userEmail());
-        user.setPassword(encoder.encode(req.password()));
-        user.setRole(Role.EMPLOYEE);
+        UserAuth user = UserAuth.builder()
+                .userName(req.userName())
+                .userEmail(req.userEmail())
+                .password(encoder.encode(req.password()))
+                .role(Role.EMPLOYEE)
+                .build();
         repo.save(user);
     }
 
